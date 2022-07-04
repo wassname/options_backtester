@@ -97,8 +97,8 @@ class Backtest:
         if sma_days:
             self.stocks_data.sma(sma_days)
 
-        dates = pd.DataFrame(self.options_data._data[['quotedate',
-                                                      'volume']]).drop_duplicates('quotedate').set_index('quotedate')
+        dates = pd.DataFrame(self.options_data._data[['date',
+                                                      'volume']]).drop_duplicates('date').set_index('date')
         rebalancing_days = pd.to_datetime(
             dates.groupby(pd.Grouper(freq=str(rebalance_freq) +
                                      'BMS')).apply(lambda x: x.index.min()).values) if rebalance_freq else []
