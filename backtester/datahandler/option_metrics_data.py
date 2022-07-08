@@ -11,7 +11,18 @@ class OptionMetricsData:
         if schema is None:
             self.schema = OptionMetricsData.default_schema()
 
-        self._data = load_for_tickers(tickers).reset_index()
+        self._data = load_for_tickers(tickers).reset_index().rename(columns={'secid': 'underlying',
+            'forward_price': 'underlying_last',
+            'optionid': 'contract',
+            'cp_flag': 'type',
+            'exdate': 'expiration',
+            'strike_price': 'strike',
+            'best_bid': 'bid',
+            'best_offer': 'ask',
+            'open_interest': 'open_interest',
+            'impl_volatility': 'impliedvol'})
+        self._data['type'] = self._data['type'].replace('C', 'call').replace('P', 'put')
+        self._data['contract'] = self._data['contract'].astype(str)
         # self._data['date']=self._data.date.dt.tz_localize('utc')
         # self._data['exdate']=self._data['exdate'].dt.tz_localize('utc')
         # print(self._data.head(5))
@@ -80,32 +91,23 @@ class OptionMetricsData:
     def default_schema():
         """Returns default schema for Historical Options Data"""
         schema = Schema.options()
-        schema.update({
-            'underlying': 'secid',
-            'underlying_last': 'forward_price',  #last price of underlying
-            'date': 'date',
-            'contract': 'optionid',
-            'type': 'cp_flag',
-            'expiration': 'exdate',
-            'strike': 'strike_price',
-            'bid': 'best_bid',
-            'ask': 'best_offer',
-            'volume': 'volume',
-            'open_interest': 'open_interest',
-            'last': 'forward_price',
-            'impliedvol': 'impl_volatility',
-            'vega': 'vega',
-            'delta': 'delta',
-            'gamma': 'gamma',
-            'theta': 'theta',
-        })
+        # schema.update({
+        #     'underlying': 'secid',
+        #     'underlying_last': 'forward_price',  #last price of underlying
+        #     'date': 'date',
+        #     'contract': 'optionid',
+        #     'type': 'cp_flag',
+        #     'expiration': 'exdate',
+        #     'strike': 'strike_price',
+        #     'bid': 'best_bid',
+        #     'ask': 'best_offer',
+        #     'volume': 'volume',
+        #     'open_interest': 'open_interest',
+        #     'last': 'forward_price',
+        #     'impliedvol': 'impl_volatility',
+        #     'vega': 'vega',
+        #     'delta': 'delta',
+        #     'gamma': 'gamma',
+        #     'theta': 'theta',
+        # })
         return schema
-
-
-# Index(['symbol', 'symbol_flag', 'exdate', 'last_date', 'cp_flag',
-#        'strike_price', 'best_bid', 'best_offer', 'volume', 'open_interest',
-#        'impl_volatility', 'delta', 'gamma', 'vega', 'theta', 'optionid',
-#        'cfadj', 'am_settlement', 'contract_size', 'ss_flag', 'forward_price',
-#        'expiry_indicator', 'root', 'suffix', 'secid'],
-#       dtype='object')
-# Schema([Field(name='underlying', mapping='underlying'), Field(name='underlying_last', mapping='underlying_last'), Field(name='date', mapping='quotedate'), Field(name='contract', mapping='optionroot'), Field(name='type', mapping='type'), Field(name='expiration', mapping='expiration'), Field(name='strike', mapping='strike'), Field(name='bid', mapping='bid'), Field(name='ask', mapping='ask'), Field(name='volume', mapping='volume'), Field(name='open_interest', mapping='openinterest'), Field(name='last', mapping='last'), Field(name='impliedvol', mapping='impliedvol'), Field(name='delta', mapping='delta'), Field(name='gamma', mapping='gamma'), Field(name='theta', mapping='theta'), Field(name='vega', mapping='vega')])
